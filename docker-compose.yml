@@ -11,10 +11,16 @@ services:
     depends_on:
       - cassandra
     network_mode: host
-    entrypoint: sh cassandra.sh  # setup cassandra
+    entrypoint: sh cassandra.sh
   
   cliclient:
     build: cliclient
     network_mode: host
     environment:
       - PYTHONUNBUFFERED=0
+  
+  test_client:
+    build: cliclient
+    environment:
+      - PYTHONUNBUFFERED=0
+    entrypoint: pytest
