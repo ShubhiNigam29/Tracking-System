@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  cassandra:
+    image: 'bitnami/cassandra:latest'
+    ports:
+      - "9042:9042" # Port for native protocol clients
+
+  tracking_service:
+    build: tracking_service
+    command: sbt run
+    depends_on:
+      - cassandra
+    network_mode: host
+    entrypoint: sh cassandra.sh  # setup cassandra
