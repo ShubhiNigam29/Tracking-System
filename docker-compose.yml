@@ -5,8 +5,8 @@ services:
     ports:
       - "9042:9042" # Port for native protocol clients
 
-  tracking_service:
-    build: tracking_service
+  trackingservice:
+    build: trackingservice
     command: sbt run
     depends_on:
       - cassandra
