@@ -1,6 +1,6 @@
 lazy val root := (project in file("."))
   .settings(
-    name := "Tracking service",
+    name := "Tracking Service",
     version := "0.1",
     scalaVersion := "2.12.12",
     sbtVersion := "1.4.6"
