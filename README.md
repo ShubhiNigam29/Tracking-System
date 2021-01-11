@@ -54,3 +54,4 @@ and formats is up to you.
 - Finally, the application should be documented, explaining the architectural, technological
 and other decision you made
 - Prefer technologies you are used to (if they are a good fit for the solution)
+
