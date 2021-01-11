@@ -7,5 +7,5 @@ lazy val root := (project in file("."))
   )
 
 libraryDependencies += "com.tumblr" %% "colossus" % "0.8.3"
-libraryDependencies += "com.newmotion" %% "akka-rabbitmq" % "6.0.0"
-libraryDependencies += "com.datastax.cassandra" % "cassandra-driver-core" % "3.2.0"
+libraryDependencies += "org.zeromq" %% "zeromq-scala-binding" % "0.0.9"
+libraryDependencies += "com.datastax.cassandra" % "cassandra-driver-core" % "3.6.0"

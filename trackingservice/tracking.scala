@@ -4,106 +4,67 @@ import service._
 import protocols.http._
 import UrlParsing._
 import HttpMethod._
-import akka.actor.Actor
-import akka.actor.Props
-import akka.actor.ActorSystem
+import akka.actor
 import com.datastax.driver.core._
-import com.rabbitmq.client.Channel
-import com.rabbitmq.client.Connection
-import com.rabbitmq.client.ConnectionFactory
+import org.zeromq.ZMQ
 
-
+// Top-level object extending trait App - entry point of program
 object Main extends App {
+    // ZeroMQ setup
+    class ZMQActor extends actor.Actor {
 
-    object RabbitMQConnection {
+        // Initialization and binding of the ZeroMQ socket
+        // Publishers are created with ZMQ.PUB socket types
+        val context = ZMQ.context()
+        val socket = context.socket(ZMQ.PUB)
+        val port = "5556"
+        socket.bind("tcp://*:%s" % port)
 
-        private val connection: Connection = null;
-
-        /**
-        * Return a connection if one doesn't exist. Else create
-        * a new one
-        */
-        def getConnection(): Connection = {
-            connection match {
-                case null => {
-                    val factory = new ConnectionFactory(
-                        HostName = "localhost",
-                        UserName = "guest",
-                        Password = "guest",
-                        Port = 5672,
-                        RequestedConnectionTimeout = 3000, // milliseconds
-                    );
-                    factory.setHost(ConfigFactory.load().getString("rabbitmq.host"));
-                    factory.newConnection();
-                }
-                case _ => connection
-            }
-        }
-    }
-
-    object Sender {
-
-        def startSending = {
-            // create the connection
-            val connection = RabbitMQConnection.getConnection();
-            // create the channel we use to send
-            val sendingChannel = connection.createChannel();
-            // make sure the queue exists we want to send to
-            sendingChannel.queueDeclare(ConfigFactory.load().getString("rabbitmq.queue"), false, false, false, null);
-
-            Akka.system.scheduler.schedule(2 seconds, 1 seconds
-                , Akka.system.actorOf(Props(
-                    new SendingActor(channel = sendingChannel, 
-                                                queue = ConfigFactory.load().getString("rabbitmq.queue"))))
-                , "MSG to Queue");
-        }
-    }
-
-    class SendingActor(channel: Channel, queue: String) extends Actor {
-
-    def receive = {
-      case QueueMsq(msq) => {
-        channel.basicPublish("", queue, null, msg.getBytes());
-        Logger.info(msg);
-      }
-      case _ => {}
-    }
-  }
-  case class QueueMsq(msg: String)
-
-  Server.start("cassandra-http", 9000){ new Initializer(_) {
-
-    // Multiple cassandra sessions per app instance
-    private val session = Cluster.builder().addContactPoint("localhost").withPort(9042).build().connect()
-    // PreparedStatement of Cassandra lowers network traffic and CPU utilization and therefore, is fast
-    private val prepared: PreparedStatement = session.prepare("SELECT * FROM accounts.accounts WHERE accountId = ?;");
-
-   
-  class ListeningActor(channel: Channel, queue: String, f: (String) => Any) extends Actor {
-
-        // called on the initial run
         def receive = {
-            case _ => startReceving
+            // Send message to the socket
+            case QueueMsg(message) => socket.send(message.getBytes(), 0)
         }
+    }
 
-        def startReceving = {
+    // Case class to talk to actor instance
+    case class QueueMsg(message: String)
 
-            val consumer = new QueueingConsumer(channel);
-            channel.basicConsume(queue, true, consumer);
+    // Initialize actor system and I/O
+    implicit val actorSystem = actor.ActorSystem()
+    implicit val ioSystem = IOSystem()
+    // Actor that push messages to ZeroMQ safely
+    val actor = actorSystem.actorOf(actor.Props[ZMQActor], "zmqActor")
 
-            while (true) {
-                // wait for the message
-                val delivery = consumer.nextDelivery();
-                val msg = new String(delivery.getBody());
+    Server.start("cassandra-http-request", 9000){initContext => new Initializer(initContext) {
+        // Multiple cassandra sessions per app instance
+        private val session = Cluster.builder().addContactPoint("localhost").withPort(9042).build().connect()
+        // PreparedStatement of Cassandra lowers network traffic and CPU utilization and therefore, is fast
+        private val prepared: PreparedStatement = session.prepare("SELECT * FROM accounts.accounts WHERE accountId = ?;");
+        override def onConnect : RequestHandlerFactory = context => new HttpService(context) {
+            override def handle: PartialHandler[Http] = {
+                // API example: BASE_URL/<accountId>?data=”<data>”
+                case request @ Get on Root / accId ? data => {
 
-                // send the message to the provided callback function
-                // and execute this in a subactor
-                context.actorOf(Props(new Actor {
-                    def receive = {
-                        case some: String => f(some);
+                    val accountId: Integer = accId.toInt;
+                    val results = session.execute(prepared.bind(accountId)).all();
+                    // Validate account id
+                    if (results.size() > 0) {
+                        // If Account Id is active and present in database
+                        if (results.get(0).getBool("isActive")) {
+                            //  Propagate event to the pub/sub system by adding timestamp
+                            val msg = "trackingservice %d %d %s\u0000".format(accountId, System.currentTimeMillis, data);
+                            actor ! QueueMsg(msg)
+                            Callback.successful(request.ok("Request propagated to the subscribers!"))
+                        } else {
+                            // Inactive account
+                            Callback.successful(request.badRequest("Inactive account!"))
+                        }
+                    } else {
+                        // Account Id doesn't exist
+                        Callback.successful(request.badRequest("Account Id does not exist!"))
                     }
-                })) ! msg
+                }
             }
-        }   
+        }
     }
 }
