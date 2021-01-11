@@ -108,10 +108,10 @@ CLI client is a lightweight Python service that can filter messages based on Acc
 
 1. Clone Repo from github <br />
 2. Run `docker-compose build` for building trackingservice and cliclient <br />
-3. Run `docker-compose run trackingservice` to start tracking service <br />
-4. Run `docker-compose run cliclient` to start cli client <br />
+3. Run `docker-compose run tracking_service` to start tracking service <br />
+4. Run `docker-compose run cli_client` to start cli client <br />
 
 # Tests
 
 Pytests for cliclient are available by running the below command: <br />
-`docker-compose run testclient`
+`docker-compose run test_client`

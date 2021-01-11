@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pytest import fixture
-from cliclient import init_service
+from cli_client import init_service
 
 @fixture
 def socket():
