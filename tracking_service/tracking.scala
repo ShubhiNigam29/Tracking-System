@@ -4,21 +4,22 @@ import service._
 import protocols.http._
 import UrlParsing._
 import HttpMethod._
-import akka.actor
+import akka.actor.Actor
+import akka.actor.Props
+import akka.actor.ActorSystem
 import com.datastax.driver.core._
 import org.zeromq.ZMQ
 
 // Top-level object extending trait App - entry point of program
 object Main extends App {
     // ZeroMQ setup
-    class ZMQActor extends actor.Actor {
+    class ZMQActor extends Actor {
 
         // Initialization and binding of the ZeroMQ socket
         // Publishers are created with ZMQ.PUB socket types
-        val context = ZMQ.context()
-        val socket = context.socket(ZMQ.PUB)
-        val port = "5556"
-        socket.bind("tcp://*:%s" % port)
+        val Qcontext = ZMQ.context(1)
+        val socket = Qcontext.socket(ZMQ.PUB)
+        socket.bind("tcp://*:5556")
 
         def receive = {
             // Send message to the socket
@@ -30,20 +31,22 @@ object Main extends App {
     case class QueueMsg(message: String)
 
     // Initialize actor system and I/O
-    implicit val actorSystem = actor.ActorSystem()
+    implicit val actorSystem = ActorSystem()
     implicit val ioSystem = IOSystem()
     // Actor that push messages to ZeroMQ safely
-    val actor = actorSystem.actorOf(actor.Props[ZMQActor], "zmqActor")
+    val actor = actorSystem.actorOf(Props[ZMQActor], "zmqActor")
 
-    Server.start("cassandra-http-request", 9000){initContext => new Initializer(initContext) {
+    Server.start("cassandra-http-request", 9000){ new Initializer(_) {
         // Multiple cassandra sessions per app instance
         private val session = Cluster.builder().addContactPoint("localhost").withPort(9042).build().connect()
         // PreparedStatement of Cassandra lowers network traffic and CPU utilization and therefore, is fast
         private val prepared: PreparedStatement = session.prepare("SELECT * FROM accounts.accounts WHERE accountId = ?;");
-        override def onConnect : RequestHandlerFactory = context => new HttpService(context) {
-            override def handle: PartialHandler[Http] = {
-                // API example: BASE_URL/<accountId>?data=”<data>”
-                case request @ Get on Root / accId ? data => {
+        // override def onConnect : RequestHandlerFactory
+        def onConnect = context => new HttpService(context) {
+            // override def handle: PartialHandler[Http]
+            def handle = {
+                // API example: BASE_URL/<accountId>/data=”<data>”
+                case request @ Get on Root / accId / data => {
 
                     val accountId: Integer = accId.toInt;
                     val results = session.execute(prepared.bind(accountId)).all();
@@ -66,5 +69,5 @@ object Main extends App {
                 }
             }
         }
-    }
+    }}
 }

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from cassandra.cluster import Cluster
 import time
 

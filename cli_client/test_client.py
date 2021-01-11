@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pytest import fixture
 from cliclient import init_service
 
@@ -13,7 +14,7 @@ def test_client_output_1(capfd, socket):
     """ 
         Case 1: No account id filter is provided
     """
-    init_service(socket, aggregation_batch=5, msg_limit=10)
+    init_service(socket, aggregation_batch=10, msg_limit=10)
     out, err = capfd.readouterr()
 
     outcome = ['pytest data string']*10

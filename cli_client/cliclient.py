@@ -8,8 +8,7 @@ def get_socket():
     # Subscribers are created with ZMQ.SUB socket types
     # Socket to talk to server
     socket = zmq.Context().socket(zmq.SUB)
-    port = "5556"
-    socket.connect("tcp://localhost:%s" % port)
+    socket.connect("tcp://localhost:5556")
     # zmq supports filtering of messages based on topics at subscriber side
     socket.setsockopt_string(zmq.SUBSCRIBE, u'trackingservice')
     return socket

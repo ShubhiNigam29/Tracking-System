@@ -55,3 +55,63 @@ and formats is up to you.
 and other decision you made
 - Prefer technologies you are used to (if they are a good fit for the solution)
 
+# Solution & Design
+
+1. Colossus
+
+```
+Colossus is a low-level event-based framework. In a nutshell, it spins up multiple event loops, generally one per CPU core. TCP connections are bound to event loops and request handlers are attached to connections to transform incoming requests into responses. I/O operations (such as making requests to a remote cache or another service) can be done asynchronously and entirely within the event loop, eliminating the need for complex multi-threaded code and greatly reducing the overhead of asynchronous operations.
+```
+
+2. Actors
+
+```
+Actors are implemented by extending the *Actor* base trait and implementing the receive method. The receive method should define a series of case statements (which has the type PartialFunction[Any, Unit]) that defines which messages your Actor can handle, using standard Scala pattern matching, along with the implementation of how the messages should be processed.
+```
+
+3. Cassandra
+
+```
+The Apache Cassandra database is the right choice because it is persistent and we need scalability and high availability without compromising performance. Linear scalability and proven fault-tolerance on commodity hardware or cloud infrastructure make it the perfect platform for mission-critical data. Cassandra's support for replicating across multiple datacenters is best-in-class, providing lower latency for users.
+```
+
+4. Docker
+
+```
+Docker is an open platform for developing, shipping, and running applications. Docker enables us to separate applications from infrastructure so the software can be delivered quickly. Docker is a software platform for building applications based on containers — small and lightweight execution environments that make shared use of the operating system kernel but otherwise run in isolation from one another.
+```
+
+5. Docker compose
+
+```
+Compose is a tool for defining and running multi-container Docker applications. With Compose, we use a YAML file to configure application’s services. Then, with a single command, we create and start all the services from the configuration.
+```
+
+# Tracking Service
+
+1. Port: 9000 is used by the service to listen to incoming requests <br />
+2. Let request be - localhost:9000/1/"test string sample", where 1 represents accountId, and test string sample is our data string. <br />
+Request validation: <br />
+a) If account id doesn't exist, HTTP 400: Account Id does not exist! is returned. <br />
+b) If result is retrieved, accountId is checked for activeness. If inactive, HTTP 400: Inactive account! is returned. <br />
+c) If active account, HTTP 200: Request propagated to the subscribers! is returned, and message is pushed to the message queue. <br />
+
+# Pub/Sub System
+
+ZeroMQ (also known as ØMQ, 0MQ, or zmq) acts like a concurrency framework. It gives sockets that carry atomic messages across various transports like in-process, inter-process, TCP, and multicast. One can connect sockets N-to-N with patterns like fan-out, pub-sub, task distribution, and request-reply. It's fast enough to be the fabric for clustered products. Its asynchronous I/O model gives scalable multicore applications, built as asynchronous message-processing tasks.
+
+# CLI Client
+
+CLI client is a lightweight Python service that can filter messages based on Account id. Client is subscribed to specific ZeroMQ topic and displays data string sent by tracking service. Client also provides support for aggregation, default value is 500.
+
+# How to use?
+
+1. Clone Repo from github <br />
+2. Run `docker-compose build` for building trackingservice and cliclient <br />
+3. Run `docker-compose run trackingservice` to start tracking service <br />
+4. Run `docker-compose run cliclient` to start cli client <br />
+
+# Tests
+
+Pytests for cliclient are available by running the below command: <br />
+`docker-compose run testclient`

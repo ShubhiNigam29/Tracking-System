@@ -1,5 +1,5 @@
 #!/bin/bash
 set -e
 cmd="$@"
-python cassandra.py
+python runcassandra.py
 exec $cmd
