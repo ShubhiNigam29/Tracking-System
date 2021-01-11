@@ -12,3 +12,9 @@ services:
       - cassandra
     network_mode: host
     entrypoint: sh cassandra.sh  # setup cassandra
+  
+  cliclient:
+    build: cliclient
+    network_mode: host
+    environment:
+      - PYTHONUNBUFFERED=0
