@@ -57,16 +57,18 @@ and other decision you made
 
 # Solution & Design
 
-1. Colossus
+1. **Colossus** is chosen for the tracking service because it offers a lightweight, straightforward model for building high-performing microservices. Since, high throughput system is required, it is best to use this framework to develop fast and fault-tolerant services.
+
+### Brief description about Colossus
 
 ```
-Colossus is a low-level event-based framework. In a nutshell, it spins up multiple event loops, generally one per CPU core. TCP connections are bound to event loops and request handlers are attached to connections to transform incoming requests into responses. I/O operations (such as making requests to a remote cache or another service) can be done asynchronously and entirely within the event loop, eliminating the need for complex multi-threaded code and greatly reducing the overhead of asynchronous operations.
+ Colossus is a low-level event-based framework. In a nutshell, it spins up multiple event loops, generally one per CPU core. TCP connections are bound to event loops and request handlers are attached to connections to transform incoming requests into responses. I/O operations (such as making requests to a remote cache or another service) can be done asynchronously and entirely within the event loop, eliminating the need for complex multi-threaded code and greatly reducing the overhead of asynchronous operations.
 ```
 
-2. Actors
+2. **Actors** model provides a higher level of abstraction for writing concurrent and distributed systems. While using Colossus, Actors provided by Scala provide safe implementation and design to ensure secured transfer of messages to message queue.
 
 ```
-Actors are implemented by extending the *Actor* base trait and implementing the receive method. The receive method should define a series of case statements (which has the type PartialFunction[Any, Unit]) that defines which messages your Actor can handle, using standard Scala pattern matching, along with the implementation of how the messages should be processed.
+Actors are implemented by extending the Actor base trait and implementing the receive method. The receive method should define a series of case statements (which has the type PartialFunction[Any, Unit]) that defines which messages your Actor can handle, using standard Scala pattern matching, along with the implementation of how the messages should be processed.
 ```
 
 3. Cassandra
@@ -99,6 +101,8 @@ c) If active account, HTTP 200: Request propagated to the subscribers! is return
 # Pub/Sub System
 
 ZeroMQ (also known as ØMQ, 0MQ, or zmq) acts like a concurrency framework. It gives sockets that carry atomic messages across various transports like in-process, inter-process, TCP, and multicast. One can connect sockets N-to-N with patterns like fan-out, pub-sub, task distribution, and request-reply. It's fast enough to be the fabric for clustered products. Its asynchronous I/O model gives scalable multicore applications, built as asynchronous message-processing tasks.
+
+![alt text](https://github.com/ShubhiNigam29/Tracking-System/blob/main/Pub_sub.png)
 
 # CLI Client
 
