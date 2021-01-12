@@ -59,8 +59,6 @@ and other decision you made
 
 1. **Colossus** is chosen for the tracking service because it offers a lightweight, straightforward model for building high-performing microservices. Since, high throughput system is required, it is best to use this framework to develop fast and fault-tolerant services.
 
-### Brief description about Colossus
-
 ```
  Colossus is a low-level event-based framework. In a nutshell, it spins up multiple event loops, generally one per CPU core. TCP connections are bound to event loops and request handlers are attached to connections to transform incoming requests into responses. I/O operations (such as making requests to a remote cache or another service) can be done asynchronously and entirely within the event loop, eliminating the need for complex multi-threaded code and greatly reducing the overhead of asynchronous operations.
 ```
@@ -76,6 +74,8 @@ Actors are implemented by extending the Actor base trait and implementing the re
 ```
 The Apache Cassandra database is the right choice because it is persistent and we need scalability and high availability without compromising performance. Linear scalability and proven fault-tolerance on commodity hardware or cloud infrastructure make it the perfect platform for mission-critical data. Cassandra's support for replicating across multiple datacenters is best-in-class, providing lower latency for users.
 ```
+
+![alt text](https://github.com/ShubhiNigam29/Tracking-System/blob/main/cassandra.jpg)
 
 4. **Docker** provides containers. Containerization of applications brings many benefits, including the following:
 
