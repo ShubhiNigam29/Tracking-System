@@ -71,19 +71,30 @@ and other decision you made
 Actors are implemented by extending the Actor base trait and implementing the receive method. The receive method should define a series of case statements (which has the type PartialFunction[Any, Unit]) that defines which messages your Actor can handle, using standard Scala pattern matching, along with the implementation of how the messages should be processed.
 ```
 
-3. Cassandra
+3. **Cassandra** is the ideal choice for database as it is persistent by default. Data is automatically replicated to multiple nodes for fault tolerance. It is elastic, i.e. read & write throughput both increase linearly as new machines are added, with no downtime or interruption to applications.
 
 ```
 The Apache Cassandra database is the right choice because it is persistent and we need scalability and high availability without compromising performance. Linear scalability and proven fault-tolerance on commodity hardware or cloud infrastructure make it the perfect platform for mission-critical data. Cassandra's support for replicating across multiple datacenters is best-in-class, providing lower latency for users.
 ```
 
-4. Docker
+4. **Docker** provides containers. Containerization of applications brings many benefits, including the following:
+
+- Portability <br />
+- Efficient use of fewer resources <br />
+- Faster app start-up and easier scaling <br />
 
 ```
 Docker is an open platform for developing, shipping, and running applications. Docker enables us to separate applications from infrastructure so the software can be delivered quickly. Docker is a software platform for building applications based on containers — small and lightweight execution environments that make shared use of the operating system kernel but otherwise run in isolation from one another.
 ```
 
-5. Docker compose
+![alt text](https://github.com/ShubhiNigam29/Tracking-System/blob/main/docker-vm.jpg)
+
+5. **Docker compose** is used because it provides:
+
+- Single host environment <br />
+- Quick and easy configuration <br />
+- High productivity <br />
+- Security <br />
 
 ```
 Compose is a tool for defining and running multi-container Docker applications. With Compose, we use a YAML file to configure application’s services. Then, with a single command, we create and start all the services from the configuration.
